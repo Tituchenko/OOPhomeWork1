@@ -145,10 +145,10 @@ public class Main {
 
     }
     public static void showTrack(List<Track> tracks){
-        System.out.println("Наша трасса "+tracks.get(0).from+" - "+tracks.get(tracks.size()-1).destanation+":");
+        System.out.println("Наша трасса "+tracks.get(0).getFrom()+" - "+tracks.get(tracks.size()-1).getDestanation()+":");
         for (int i = 0; i < tracks.size(); i++) {
-            System.out.println(i+"."+tracks.get(i).from+"-"+tracks.get(i).destanation+". Расстояние:"+
-                    tracks.get(i).s+" км." + tracks.get(i).thigs.text);
+            System.out.println((i+1)+"."+tracks.get(i).getFrom()+"-"+tracks.get(i).getDestanation()+". Расстояние:"+
+                    tracks.get(i).getS()+" км." + tracks.get(i).getThigsText());
         }
 
     }
@@ -174,65 +174,116 @@ public class Main {
         return " "+hStr+":"+mStr+":"+sStr;
 
     }
+    public static void getBeutyDiagramSpeed (String name,double richMaxSpeedS,double S,int maxSpeed,int speedAtFinish){
+        String diagram="";
+        String maxSpeedString="";
 
+        if (richMaxSpeedS==0){
+            diagram="*".repeat(100);
+            maxSpeedString=" ".repeat(99);
+        } else {
+            int blockAclerat=(int) Math.round(100*richMaxSpeedS/S);
+            if (blockAclerat>1) {
+                diagram = "*".repeat(blockAclerat) + "-".repeat(100 - blockAclerat);
+                maxSpeedString = " ".repeat(blockAclerat - 1) + maxSpeed;
+            }
+            if (maxSpeedString.length()<100) {
+                maxSpeedString += " ".repeat(100 - maxSpeedString.length());
+            }
+        }
+        System.out.println(name+" ".repeat(15-name.length())+":"+diagram);
+        System.out.println("км/ч"+" ".repeat(12)+"0"+maxSpeedString+speedAtFinish);
+    }
     public static void show2UsersCompetition(User user1,User user2){
-        for (int i = 0; i < user1.carOnTrackList.size(); i++) {
-            System.out.println((i+1)+".Время финиша:");
-            System.out.println(user1.getName()+getBuityTime(user1.carOnTrackList.get(i).finishTime));
-            System.out.println(user2.getName()+getBuityTime(user2.carOnTrackList.get(i).finishTime));
-            if (user1.carOnTrackList.get(i).finishTime>user2.carOnTrackList.get(i).finishTime){
-                System.out.println(user2.getName()+ " впереди (+"+getBuityTime(user1.carOnTrackList.get(i).finishTime-
-                        user2.carOnTrackList.get(i).finishTime)+")");
+        for (int i = 0; i < user1.getSizeCarOnTrackList(); i++) {
+
+            System.out.println((i+1)+"."+user1.getFromTo(i)+"."+user1.getTextThings(i));
+            System.out.println("Диаграмма скорости (* ускорени, - движение с постоянной скоростью):");
+            getBeutyDiagramSpeed(user1.getName(),user1.getMaxSpeedS(i),user1.getS(i),user1.getMaxSpeedOnTrack(i),
+                    user1.getSpeedOnFish(i));
+            getBeutyDiagramSpeed(user2.getName(),user2.getMaxSpeedS(i),user2.getS(i),user2.getMaxSpeedOnTrack(i),
+                    user2.getSpeedOnFish(i));
+
+            System.out.println("Время финиша:");
+            System.out.println(user1.getName()+getBuityTime(user1.getFinishTime(i)));
+            System.out.println(user2.getName()+getBuityTime(user2.getFinishTime(i)));
+            if (user1.getFinishTime(i)>user2.getFinishTime(i)){
+                System.out.println(user2.getName()+ " впереди (+"+getBuityTime(user1.getFinishTime(i)-
+                        user2.getFinishTime(i))+")");
             } else {
-                System.out.println(user1.getName()+ " впереди (+"+getBuityTime(user2.carOnTrackList.get(i).finishTime-
-                        user1.carOnTrackList.get(i).finishTime)+")");
+                System.out.println(user1.getName()+ " впереди (+"+getBuityTime(user2.getFinishTime(i)-
+                        user1.getFinishTime(i))+")");
             }
 
 
+        pause();
 
         }
     }
+    public static void pause(){
+        System.out.println("[Enter] - продолжить...");
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine();
 
+    }
     public static void game(){
+        String p;
         User user = new User(5000000,"Пользователь");
         User comp = new User(5000000,"Компьютер");
 
 
         System.out.println("Добро пожаловать в игру:");
+        do {
+
+            List<TrackThings> baseThings = generateThings();
+            List<Track> tracks = generateTrack(baseThings, 10);
+            showTrack(tracks);
+            pause();
+            List<Car> randomCars = getRandomCar(5);
+            System.out.println("У тебя " + Car.getBeautifulMoney(user.getMoney()) + " руб");
+            System.out.println("Выбери машину:");
+            Car.compareCar(randomCars);
+            Scanner scanner = new Scanner(System.in);
+            do {
+                p = scanner.nextLine();
+            } while (Integer.parseInt(p)<1 || Integer.parseInt(p)>5 ||
+                    randomCars.get(Integer.parseInt(p) - 1).getPrice()> user.getMoney());
+            user.setCar(randomCars.get(Integer.parseInt(p) - 1));
+            int id_random_comp;
+            do {
+                id_random_comp=(int) (Math.random()*5);
+            } while (id_random_comp==(Integer.parseInt(p) - 1));
+            comp.setCar(randomCars.get(id_random_comp));
+
+            System.out.println("У компьютера:");
+            comp.showCar();
+            pause();
 
 
-        List<TrackThings> baseThings=generateThings();
-        List<Track> tracks=generateTrack(baseThings,10);
-        showTrack(tracks);
+            user.goTrack(tracks);
+            comp.goTrack(tracks);
+            show2UsersCompetition(user, comp);
 
-        List<Car> randomCars=getRandomCar(5);
-        System.out.println("У тебя "+user.getMoney()+" руб");
-        System.out.println("Выбери машину:");
-        Car.compareCar(randomCars);
-        Scanner scanner = new Scanner(System.in);
-        String p = scanner.nextLine();
-        user.setCar(randomCars.get(Integer.parseInt(p)));
-
-
-
-
-        comp.setCar(randomCars.get((int) (Math.random()*5)));
-
-        System.out.println("У компьютера:");
-        comp.showCar();
-
-
-        user.goTrack(tracks);
-        comp.goTrack(tracks);
-        show2UsersCompetition(user,comp);
-
-        if (user.carOnTrackList.get(user.carOnTrackList.size()-1).finishTime>
-                comp.carOnTrackList.get(comp.carOnTrackList.size()-1).finishTime){
-            System.out.println("Ты проиграл!");
-        } else {
-            System.out.println("Ты выиграл!");
-        }
-
+            if (user.getFinishTime(user.getSizeCarOnTrackList() - 1) > comp.getFinishTime(comp.getSizeCarOnTrackList() - 1)) {
+                System.out.println("Ты проиграл!");
+            } else {
+                System.out.println("Ты выиграл!");
+                double discount=getRandomDouble(30,70);
+                System.out.println("Ты получаешь машину соперника");
+                System.out.println("Обе машины удалось продать со скидкой в "+Math.round(discount)+"%");
+                double userCarSell=user.getCar().getPrice()*discount/100;
+                double compCarSell=comp.getCar().getPrice()*discount/100;
+                System.out.println("Заработано "
+                        +Car.getBeautifulMoney(userCarSell+compCarSell-user.getCar().getPrice())+" руб");
+                user.editMoney(userCarSell+compCarSell);
+                System.out.println("У тебя " + Car.getBeautifulMoney(user.getMoney()) + " руб");
+            }
+            System.out.println("Следующая гонка (y/n)");
+            do  {
+                p = scanner.nextLine();
+            } while (!(p.equals("y") || p.equals("n")));
+        }while (!p.equals("n"));
+        System.out.println("До новых встреч!");
 
 
 

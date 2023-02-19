@@ -20,14 +20,30 @@ import java.util.List;
 */
 public class Car {
 
-    String model;
-    int year;
-    double price;
-    String color;
-    int power;
-    double maxVelocity;
+    public String getModel() {
+        return model;
+    }
 
-    double accelerat100;
+    public int getYear() {
+        return year;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public int getPower() {
+        return power;
+    }
+
+    private String model;
+    private int year;
+    private double price;
+    private String color;
+    private int power;
+    private double maxVelocity;
+
+    private double accelerat100;
     private boolean powerOn;
     private List<Fruit> fruit;
 
@@ -54,7 +70,7 @@ public class Car {
 
        float weight=0;
             for (Fruit f:this.fruit) {
-                weight+=f.weight;
+                weight+=f.getWeight();
             }
             System.out.println("В машине " + weight + " кг фруктов");
         } else {
@@ -65,7 +81,7 @@ public class Car {
         if (this.fruit.size()>0){
             System.out.println("В машине фрукты:");
             for (Fruit f:this.fruit) {
-                System.out.println(f.name + " - "+f.weight + "кг;");
+                System.out.println(f.getName() + " - "+f.getWeight() + "кг;");
             }
         } else {
             System.out.println("В машине нет фруктов");
@@ -84,7 +100,7 @@ public class Car {
     }
 
     public static void compareCar(List<Car> cars){
-        int colLength=20;
+        int colLength=20; //длина поля в таблице
         String models="";
         String ids="";
         String years="";
@@ -120,6 +136,10 @@ public class Car {
 
     }
 
+    public double getPrice(){return this.price;}
+    public double getMaxVelocity(){ return this.maxVelocity;}
+    public double getAccelerat100(){return this.accelerat100;}
+
     public void startEngine(){
         this.powerOn=true;
         System.out.println(this.model + " - двигатель заведен");
@@ -138,13 +158,25 @@ public class Car {
         }
     }
 
-    private static String getBeautifulMoney(double money){
-        if (money>=1000000){
-            return Double.toString((double) Math.round(money/100000)/10) + " млн";
-        } else if (money>=1000) {
-            return Double.toString((double) Math.round(money/100)/10) + " тыс";
+    public static String getBeautifulMoney(double money){
+        if (Math.abs(money)>=1000000){
+            return Double.toString(Math.round(money/100000)/10) + " млн";
+        } else if (Math.abs(money)>=1000) {
+            return Double.toString(Math.round(money/100)/10) + " тыс";
 
         }
         return Double.toString(money);
+    }
+    public Car getCarOnThings(TrackThings thigs){
+        double cur_maxVelocity=maxVelocity;
+        double cur_accelerat100=accelerat100;
+        if (thigs.getMaxSpeed()!=0){
+            cur_maxVelocity=thigs.getMaxSpeed();
+        }
+        if (thigs.getMaxAccleration()!=0){
+            cur_accelerat100=thigs.getMaxAccleration();
+        }
+        return new Car(model,year,price,color,power,
+                cur_maxVelocity*thigs.getK_maxSpped(),cur_accelerat100/ thigs.getK_Acleration());
     }
 }
